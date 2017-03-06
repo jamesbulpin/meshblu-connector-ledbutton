@@ -56,13 +56,13 @@ meshblu_light.on('config', function(device){
   console.log('Light on config');
   //console.log(JSON.stringify(device, null, 2));
 
-  if ("desiredState" in device) {
+  if (("desiredState" in device) && device.desiredState) {
     var ison = true;
-    if (device.desiredState && ("on" in device.desiredState)) {
+    if ("on" in device.desiredState) {
       ison = device.desiredState.on;
     }
     var color;
-    if (ison && ("color" in device.desiredState)) {
+    if (ison && ("color" in device.desiredState) && device.desiredState.color) {
       if (device.desiredState.color === "OCTOBLU") {
         color = device.desiredState.color;
       }
