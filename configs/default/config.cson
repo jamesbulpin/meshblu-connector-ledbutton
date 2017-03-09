@@ -1,0 +1,13 @@
+title: "Default Configuration"
+type: "object"
+properties:
+  desiredState:
+    title: "Desired State"
+    type: "object"
+    properties:
+      color:
+        title: "Color"
+        type: "string"
+      on:
+        title: "Light On"
+        type: "boolean"

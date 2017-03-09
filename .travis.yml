@@ -1,0 +1,68 @@
+language: cpp
+os:
+- linux
+- osx
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+    - g++-4.8-multilib
+    - gcc-multilib
+    - build-essential
+    - libbluetooth-dev
+    - libudev-dev
+    - libusb-1.0-0-dev
+env:
+  matrix:
+  - PACKAGER_NODE_VERSION="5.5" PACKAGER_ARCH="amd64" MAIN_BUILD="true"
+  - PACKAGER_NODE_VERSION="5.5" PACKAGER_ARCH="386"
+matrix:
+  exclude:
+  - os: osx
+    env: PACKAGER_NODE_VERSION="5.5" PACKAGER_ARCH="386"
+before_install:
+- PACKAGER_URL="https://meshblu-connector.octoblu.com/tools/packager/latest"
+- curl -fsS "${PACKAGER_URL}/travis_install_node.sh" -o /tmp/travis_install_node.sh
+- chmod +x /tmp/travis_install_node.sh
+- ". /tmp/travis_install_node.sh"
+- if [ "$TRAVIS_OS_NAME" == "linux" -a "$MAIN_BUILD" == "true" ]; then export NPM_PUBLISH="true"; fi
+install:
+- npm install --build-from-source
+script:
+- npm test
+before_deploy:
+- npm prune --production
+- npm install meshblu-connector-packager
+- npm dedupe
+- npm install -g flatten-packages
+- flatten-packages
+- npm run generate:package
+- npm run generate:schema
+- cp schemas.json deploy
+deploy:
+- provider: releases
+  api_key:
+    secure: "KTCwuYZC39JFVPIlRJEad3XYaV6oP4jbO9rrDA/idKgfdfqxWAb82wM/wn4fHIthUkJx3AdAsMzxryXhjrhOBa/fXOX7BgQGczx6gmXeJ81hR6vOWQ7rYQJFNQM4oq6Oqxwh4h0Q6HYsY6ff32ntzS73vP5DhanXPlFnc5SSBhcXe5yRexZbazXjG0uT8gHMC3TyIqfpbeYTTauKl4Ne/b13vWl++55TDCmp6+7xkH6koS8MAcmSU2ft6rae67P7ne2AitqNcJZEdDGGavRTSuZtoOLBns1DYjXaPYPsgIYxllh/okocEqJWL1oGPq+mN6vkPWBtkhhigy0W/aYwgDB+wICiwcf6pJprPjG/fk87PhkYZblGKFJl1wZrCZfgEFsJoSeLdW8zGIzxOk9OYxrYLTiHp/3g39AiuEIcXvVNWJRQITo7ZQIY1Yth2D+LGF0x8Hm9qEt831Issvlz7YsWy9P2aZYYzbjayMtZk0FL52ct6Z1cFyX1wnIgZqQRs61+C55qaTBVQInoy2JwrJBRansSApUpbMyes4u1mK8LN4L4XHOPxmQqrbETAtjPE4slhL5YkbJBZ8uivN/Augeu6lkAtlCrlL0RubPNpWUSu6WeGzQhoC/J2bgIzB27+gF2TIxT1GCDS8slnmIMHmnCG0hZ5TGdo0yBrSxBQnw="
+  file_glob: true
+  file:
+  - "deploy/*"
+  skip_cleanup: true
+  on:
+    tags: true
+- provider: npm
+  email: james.bulpin@citrix.com
+  api_key:
+    secure: "XmkHLoH0vfcIZ4H4w4SdT0eji9pLbRWvlKet+ciLxKtEHxjKs2WpbCV1JxqRgpyp/CA/gNITiufBSuERKkGVsvTm40VquqrfG6w0rqT7ac1VpppmYIi/OE+nZmGe8jUhYFJPLDGnbF3K6fmDJWYy05zfTgCXYN4viOemj1o/dNM3YmF+JgebjJEFdwjb83hbQvAXTy/zl6rWfRuMLXuLSMwmu3UkiMVymB9ZcWKYITn7dRMO2e2G/okbBqh15tMXaHcJg61UPy7DzSFoIsU49aDsfCv1uUDa4j3Sr1FfLcwoz1YjP6B4OcygD+YKQ1gDJDhoykMhgE4Puw5X66XvkhyqdfZzgfVwUevU+RAXgeNmV83/LDxKFIFP0rAspxiYS0HSm287UMjPHRJDBBB5txYMyIdMMHSHQuGNSGSLEjfhO9GeGDAGnflZk0ivWQu8/dCn/VWLQXLxnl0j1wadjATnrgWLdNfGSK2/Pl3wUYXlOpIA+SY5o3zwEeh/sp5pVOH/1XYf46J22QSbGULR8zDbQopruXLZ9ARPwgwUBEbbpWuAoOgKbttVwC2F+wFZYRuXuzJMJsq7/5BsfBi4OHx4kgGC3VmUxSRGC2szyyjAdFKzgYqupyu4bwcZQcrOD+pffPLqHK1MCONq3y/Pu8gSAygK3bHZzQigAn54WJA="
+  on:
+    tags: true
+    condition: "$NPM_PUBLISH = true"
+branches:
+  only:
+  - "/^v[0-9]/"
+after_success:
+- npm run coverage
+- npm run mocha:json
+- bash <(curl -s https://codecov.io/bash)
+- bash <(curl -s https://codecov.octoblu.com/bash)
