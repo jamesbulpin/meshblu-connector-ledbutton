@@ -7,7 +7,7 @@ _              = require 'lodash'
 
 class ButtonManager extends EventEmitter
   constructor: ->
-    @stateInterval = setInterval @_reconnect, 10000
+    @stateInterval = setInterval @_reconnect, 3600000
     
   connectIfNotAlready: (callback) =>
     return callback() if @serport?
