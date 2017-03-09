@@ -3,7 +3,10 @@ Connector = require '../'
 describe 'Connector', ->
   beforeEach (done) ->
     @sut = new Connector
-    @sut.start {}, done
+    {@button} = @sut
+    @button.connectIfNotAlready = sinon.stub().yields null
+    @sut.start {}
+    done()
 
   afterEach (done) ->
     @sut.close done
