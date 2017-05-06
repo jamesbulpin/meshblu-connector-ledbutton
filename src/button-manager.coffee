@@ -7,6 +7,7 @@ _              = require 'lodash'
 
 class ButtonManager extends EventEmitter
   constructor: ->
+    @buttonPayload = undefined
     @stateInterval = setInterval @_reconnect, 3600000
     
   connectIfNotAlready: (callback) =>
@@ -49,6 +50,8 @@ class ButtonManager extends EventEmitter
       debug 'Button push detected'
       data =
         action: "click"
+      data.payload = @buttonPayload if @buttonPayload?
+      debug 'Button push detected', data.payload
       @emit 'message', {devices: ['*'], data}
       
   close: (callback) =>
@@ -76,6 +79,7 @@ class ButtonManager extends EventEmitter
     if c
       debug 'changeLight', c
       @serport.write("COLOR " + c + "\n") if @serport?
+    @buttonPayload = data.buttonpayload if data?.buttonpayload?
     return callback()
 
 module.exports = ButtonManager

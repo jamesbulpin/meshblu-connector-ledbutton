@@ -11,3 +11,6 @@ properties:
       on:
         title: "Light On"
         type: "boolean"
+      buttonpayload:
+        title: "Button push payload"
+        type: "string"
