@@ -1,6 +1,6 @@
 {
   "name": "meshblu-connector-ledbutton",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Meshblu connector and Arduino code for a USB-connected, LED illuminated push button",
   "main": "index.js",
   "scripts": {
