@@ -25,8 +25,8 @@ class ButtonManager extends EventEmitter
   _findSerialPort: (callback) =>
     SerialPort.list (error, ports) =>
       ports.forEach (port) =>
-        debug '_findSerialPort checking', port.comName
-        if port.vendorId == '1B4F'
+        debug '_findSerialPort checking', port.comName, port.vendorId
+        if port.vendorId == '1B4F' or port.vendorId == '0x1b4f'
           return callback port
 
   _connectSerialPort: (port, callback) =>
