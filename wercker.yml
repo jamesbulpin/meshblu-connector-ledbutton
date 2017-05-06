@@ -27,6 +27,7 @@ deploy:
         name: upload to github
         code: |
           echo "Releasing: $(cat "${WERCKER_ROOT}/VERSION")"
+          github-release release -u jamesbulpin -r meshblu-connector-ledbutton --tag "$(cat "${WERCKER_ROOT}/VERSION")" || echo "Already released, skipping"
           github-release upload \
             --user jamesbulpin \
             --repo meshblu-connector-ledbutton \
