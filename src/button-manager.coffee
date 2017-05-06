@@ -8,7 +8,10 @@ _              = require 'lodash'
 class ButtonManager extends EventEmitter
   constructor: ->
     @buttonPayload = undefined
+    @serport = undefined
+    @config = undefined
     @stateInterval = setInterval @_reconnect, 3600000
+    @serialMonitor = setInterval @_monitor, 2000
     
   connectIfNotAlready: (callback) =>
     return callback() if @serport?
@@ -21,8 +24,16 @@ class ButtonManager extends EventEmitter
     debug 'Forcing serial port reconnect'
     @close (error) =>
       @connectIfNotAlready (error) =>
-        null
-  
+        if @config?
+          @_changeLight @config, () =>
+            null
+
+  _monitor: =>
+    if @serport and @serport.isOpen()
+      return
+    debug 'serport not open'
+    @_reconnect()
+
   _findSerialPort: (callback) =>
     SerialPort.list (error, ports) =>
       ports.forEach (port) =>
@@ -43,7 +54,13 @@ class ButtonManager extends EventEmitter
       
     @serport.on 'data', (data) =>
       @_handleSerial(data)
-        
+
+    @serport.on 'error', (err) =>
+      debug 'serport error', err
+
+    @serport.on 'disconnect', (err) =>
+      debug 'serport disconnect', err
+
   _handleSerial: (data) =>
     debug '_handleSerial', data
     if data.trim() == "BUTTON"
@@ -62,6 +79,10 @@ class ButtonManager extends EventEmitter
     callback()
 
   changeLight: (data, callback) =>
+    @config = data
+    @_changeLight data, callback
+
+  _changeLight: (data, callback) =>
     debug 'changeLight called with ', data
     return callback() if _.isEmpty data
     return callback() if not @serport?
