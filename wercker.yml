@@ -6,6 +6,7 @@ build:
     - script:
         name: get-latest-tags
         code: |
+          sleep 30
           mkdir -p ~/.ssh
           echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
           sed -i'' -e 's/git@github.com:/https:\/\/github.com\//' .git/config
