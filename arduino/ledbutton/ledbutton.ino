@@ -149,6 +149,7 @@ void do_button(int pin, int idx, char *fn)
 }
 
 long last_millis = 0;
+int refresh_counter = 0;
 void loop() { 
   if (Serial.available()) {
     handle_char(Serial.read());
@@ -191,11 +192,19 @@ void loop() {
         changed = true;
       }
     }
-    if (changed) {
+    if (changed || (refresh_counter == 0)) {
       for (int i = 0; i < WS2811_LED_COUNT; i++) {
         strip.setPixelColor(i, strip.Color(current_r[i], current_g[i], current_b[i]));
       }
       strip.show();
+    }
+
+    // Ensure we refresh the LEDs every now again
+    if (refresh_counter) {
+      refresh_counter--;
+    }
+    else {
+      refresh_counter = 400;
     }
   }
 }
